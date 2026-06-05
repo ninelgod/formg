@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>do u like me?</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-dvh bg-white flex items-center justify-center overflow-hidden select-none pb-[12vh]">
+
+  <div class="flex flex-col items-center px-6 w-full">
+
+    <img src="title.png"
+         class="w-full max-w-[500px] object-contain relative z-0 pointer-events-none"
+         alt="do u like me">
+
+    <div class="flex items-center justify-center w-full gap-4 sm:gap-10
+                relative z-10 -mt-[clamp(70px,18vw,200px)]">
+
+      <button id="yes-btn" onclick="selectYes()"
+              class="absolute left-0 sm:static p-0 bg-transparent border-0 outline-none cursor-pointer z-10">
+        <img id="yes-img" src="yes.png"
+             class="w-[clamp(150px,36vw,210px)] object-contain transition-all duration-300"
+             alt="yes">
+      </button>
+
+      <div class="flex flex-col items-center gap-1 shrink-0">
+        <img src="or.png"
+             class="w-[clamp(60px,16vw,95px)] object-contain"
+             alt="or">
+        <img id="cat" src="gatococa.png"
+             class="w-[clamp(110px,22vw,170px)] object-contain transition-all duration-300"
+             alt="gato triste">
+      </div>
+
+      <div id="no-wrap" class="absolute right-0 sm:static sm:shrink-0 cursor-pointer">
+        <img src="no.png"
+             class="w-[clamp(150px,36vw,210px)] object-contain"
+             alt="no">
+      </div>
+
+    </div>
+
+    <img id="msg" src="msg-pink.png" alt="te quiero marianito">
+
+  </div>
+
+  <script>
+    const noWrap = document.getElementById('no-wrap');
+    const yesBtn = document.getElementById('yes-btn');
+    const yesImg = document.getElementById('yes-img');
+    const cat    = document.getElementById('cat');
+    const msg    = document.getElementById('msg');
+
+    const CAT_IMGS = ['gatotiste.png','gatotiste2.png','gatotiste3.png','gatotiste4.png'];
+    let catIndex = -1;
+
+    let fled      = false;
+    let done      = false;
+    let onCooldown = false;
+    const PROXIMITY = 150;
+    let tx = 0, ty = 0;   
+
+    function flee(cx, cy) {
+      if (done) return;
+
+      if (!fled) {
+        if (window.innerWidth >= 640) noWrap.style.position = 'relative';
+        noWrap.style.zIndex    = '999';
+        noWrap.style.animation = 'none';
+        noWrap.style.transition = 'transform 0.18s ease-out';
+        fled = true;
+      }
+
+      catIndex = (catIndex + 1) % CAT_IMGS.length;
+      cat.src  = CAT_IMGS[catIndex];
+
+      const r  = noWrap.getBoundingClientRect();
+      const bx = r.left + r.width  / 2;
+      const by = r.top  + r.height / 2;
+      const hw = r.width  / 2 + 8;
+      const hh = r.height / 2 + 8;
+      const W  = window.innerWidth;
+      const H  = window.innerHeight;
+
+      let dx = bx - (cx ?? bx + 1);
+      let dy = by - (cy ?? by + 1);
+      const cLen = Math.hypot(dx, dy) || 1;
+      dx /= cLen;
+      dy /= cLen;
+
+      const mobile = window.innerWidth < 640;
+      const wm = mobile ? 60 : 140;
+      if (bx - hw < wm)     dx += (1 - (bx - hw)     / wm) * 2;
+      if (W - bx - hw < wm) dx -= (1 - (W - bx - hw) / wm) * 2;
+      if (by - hh < wm)     dy += (1 - (by - hh)     / wm) * 2;
+      if (H - by - hh < wm) dy -= (1 - (H - by - hh) / wm) * 2;
+
+      const fLen = Math.hypot(dx, dy) || 1;
+      dx /= fLen;
+      dy /= fLen;
+
+      const spd = mobile ? (90 + Math.random() * 60) : (270 + Math.random() * 130);
+      const jitter = mobile ? 20 : 70;
+      let newBx = bx + dx * spd + (Math.random() - 0.5) * jitter;
+      let newBy = by + dy * spd + (Math.random() - 0.5) * jitter;
+
+      newBx = Math.max(hw, Math.min(W - hw, newBx));
+      newBy = Math.max(hh, Math.min(H - hh, newBy));
+
+      tx += newBx - bx;
+      ty += newBy - by;
+
+      noWrap.style.transform = `translate(${tx}px, ${ty}px)`;
+    }
+
+    document.addEventListener('mousemove', e => {
+      if (done || onCooldown) return;
+      const r  = noWrap.getBoundingClientRect();
+      const cx = r.left + r.width  / 2;
+      const cy = r.top  + r.height / 2;
+      if (Math.hypot(e.clientX - cx, e.clientY - cy) < PROXIMITY) {
+        onCooldown = true;
+        flee(e.clientX, e.clientY);
+        setTimeout(() => onCooldown = false, 120);
+      }
+    });
+
+    document.addEventListener('touchmove', e => {
+      if (done) return;
+      const t  = e.touches[0];
+      const r  = noWrap.getBoundingClientRect();
+      const cx = r.left + r.width  / 2;
+      const cy = r.top  + r.height / 2;
+      if (Math.hypot(t.clientX - cx, t.clientY - cy) < PROXIMITY) {
+        e.preventDefault();
+        if (!onCooldown) {
+          onCooldown = true;
+          flee(t.clientX, t.clientY);
+          setTimeout(() => onCooldown = false, 220);
+        }
+      }
+    }, { passive: false });
+
+    noWrap.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      flee(t.clientX, t.clientY);
+    }, { passive: false });
+
+    function selectYes() {
+      if (done) return;
+      done = true;
+      yesBtn.style.animation = 'none';
+      yesImg.src = 'yes-checked.png';
+      cat.src    = 'gatofeli.gif';
+      cat.classList.add('animate-bounce');
+      msg.style.opacity   = '1';
+      msg.style.transform = 'translateX(-50%) scale(1)';
+      setTimeout(() => {
+        msg.style.transition = 'none';
+        msg.style.transform  = '';
+        msg.style.animation  = 'float-msg 2.8s ease-in-out infinite';
+      }, 800);
+      launchConfetti();
+    }
+
+    const COLORS = ['#ff69b4','#ff1493','#ffb3d9','#ffd700','#ff85c0','#c084fc','#f9a8d4','#fb923c'];
+    function launchConfetti() {
+      for (let i = 0; i < 90; i++) {
+        setTimeout(() => {
+          const el = document.createElement('div');
+          el.className = 'confetti-piece';
+          Object.assign(el.style, {
+            left:              Math.random() * 100 + 'vw',
+            width:             (8  + Math.random() * 10) + 'px',
+            height:            (12 + Math.random() * 10) + 'px',
+            background:        COLORS[~~(Math.random() * COLORS.length)],
+            animationDuration: (1.4 + Math.random() * 2.2) + 's',
+            transform:         `rotate(${Math.random() * 360}deg)`,
+          });
+          document.body.appendChild(el);
+          el.addEventListener('animationend', () => el.remove());
+        }, i * 32);
+      }
+    }
+  </script>
+</body>
+</html>
+
+<!--ninelgod estuvo aquí-->

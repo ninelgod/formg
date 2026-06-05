@@ -1,0 +1,72 @@
+* { -webkit-tap-highlight-color: transparent; }
+
+body {
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+.confetti-piece {
+  position: fixed;
+  border-radius: 2px;
+  top: -20px;
+  animation: fall linear forwards;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1);    }
+  14%       { transform: scale(1.08); }
+  28%       { transform: scale(1);    }
+  42%       { transform: scale(1.05); }
+  70%       { transform: scale(1);    }
+}
+
+#yes-btn {
+  animation: heartbeat 2s ease-in-out infinite;
+  transition: transform 0.15s ease-out;
+}
+
+#yes-btn:hover  { animation: none; transform: scale(1.1);  }
+#yes-btn:active { animation: none; transform: scale(0.97); }
+
+#msg {
+  position: fixed;
+  width: clamp(200px, 80vw, 360px);
+  left: 50%;
+  bottom: clamp(0.75rem, 5vh, 3rem);
+  top: auto;
+  transform: translateX(-50%) scale(0.92);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 200;
+  object-fit: contain;
+  transition: opacity 0.75s ease-out, transform 0.75s ease-out;
+}
+
+@media (min-width: 640px) {
+  #msg {
+    width: clamp(320px, 62vw, 600px);
+    bottom: auto;
+    top: clamp(15rem, 50vh, 50rem);
+    transform: translateX(-50%) scale(0.88);
+  }
+}
+
+@keyframes float-msg {
+  0%, 100% { transform: translateX(-50%) translateY(0)      scale(1);    }
+  50%       { transform: translateX(-50%) translateY(-14px)  scale(1.04); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg);  }
+  25%       { transform: rotate(-4deg); }
+  75%       { transform: rotate(4deg);  }
+}
+
+#no-wrap { animation: wiggle 2.5s ease-in-out infinite; }
+#no-wrap:hover, #no-wrap:active { animation: none; }
