@@ -47,7 +47,20 @@
 
   </div>
 
+  <audio id="bg-music" src="Lefestin.mp3" loop preload="auto"></audio>
+
   <script>
+    const music  = document.getElementById('bg-music');
+    let musicStarted = false;
+    function startMusic() {
+      if (musicStarted) return;
+      musicStarted = true;
+      music.volume = 0.5;
+      music.play().catch(() => {});
+    }
+    document.addEventListener('touchstart', startMusic, { once: true });
+    document.addEventListener('mousedown',  startMusic, { once: true });
+
     const noWrap = document.getElementById('no-wrap');
     const yesBtn = document.getElementById('yes-btn');
     const yesImg = document.getElementById('yes-img');
